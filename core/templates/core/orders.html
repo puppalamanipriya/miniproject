@@ -1,0 +1,76 @@
+{% extends "core/base.html" %}
+
+{% block title %}WaterSupply | Orders{% endblock %}
+
+{% block content %}
+<section class="container pb-5">
+  <div class="page-head">
+    <h1>My Orders</h1>
+    <p>Your completed water bottle purchases are listed below.</p>
+  </div>
+
+  {% if order_cards %}
+    <div class="row g-3">
+      {% for card in order_cards %}
+        <div class="col-lg-6">
+          <div class="order-card">
+            <div class="d-flex justify-content-between">
+              <h5>Order #{{ card.order.id }}</h5>
+              <span>{{ card.order.created_at|date:"d M Y, h:i A" }}</span>
+            </div>
+            <p class="mb-1 small"><strong>Status:</strong> {{ card.tracking.status }}</p>
+            <p class="mb-2 small"><strong>Current Location:</strong> {{ card.tracking.location }}</p>
+            <div class="progress mb-3" role="progressbar" aria-label="Tracking progress" aria-valuenow="{{ card.tracking.progress }}" aria-valuemin="0" aria-valuemax="100">
+              <div class="progress-bar" style="width: {{ card.tracking.progress }}%">{{ card.tracking.progress }}%</div>
+            </div>
+            <p class="small mb-1">
+              <strong>Delivery To:</strong>
+              {{ card.order.delivery_name }},
+              {{ card.order.delivery_address }},
+              {{ card.order.delivery_city }} - {{ card.order.delivery_pincode }}
+            </p>
+            <p class="small mb-2"><strong>Phone:</strong> {{ card.order.delivery_phone }}</p>
+            <p class="small mb-1"><strong>Invoice:</strong> {{ card.order.invoice_number|default:"Pending" }}</p>
+            <p class="small mb-2"><strong>Payment:</strong> {{ card.order.get_payment_method_display }} ({{ card.order.get_payment_status_display }})</p>
+            <p class="small mb-2"><strong>Type:</strong> {{ card.order.get_fulfillment_type_display }}</p>
+            <ul class="mt-3">
+              {% for item in card.order.items.all %}
+                <li>{{ item.product.name }} {{ item.product.volume_label }} x {{ item.quantity }} (Rs. {{ item.unit_price }})</li>
+              {% endfor %}
+            </ul>
+            <div class="d-flex gap-2 align-items-center">
+              <p class="mb-0 fw-semibold">Total Paid: Rs. {{ card.order.total_amount }}</p>
+              <a href="{{ card.delivery_map_link }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">Delivery Address Map</a>
+              <a href="{{ card.map_link }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary">Current Location Map</a>
+              <a href="{% url 'track_order' card.order.id %}" class="btn btn-sm btn-primary">Track</a>
+            </div>
+            {% if card.order.tracking_status != "cancelled" and card.order.tracking_status != "delivered" %}
+              <form method="post" action="{% url 'cancel_order' card.order.id %}" class="mt-2 d-flex gap-2">
+                {% csrf_token %}
+                <input type="text" name="cancel_reason" class="form-control form-control-sm" placeholder="Reason (optional)">
+                <button class="btn btn-sm btn-outline-danger">Cancel Order</button>
+              </form>
+            {% endif %}
+            {% if card.order.tracking_status == "delivered" and not card.order.is_return_requested %}
+              <form method="post" action="{% url 'request_return' card.order.id %}" class="mt-2 d-flex gap-2">
+                {% csrf_token %}
+                <input type="text" name="return_reason" class="form-control form-control-sm" placeholder="Return reason">
+                <button class="btn btn-sm btn-outline-warning">Request Return</button>
+              </form>
+            {% endif %}
+            {% if card.order.is_return_requested %}
+              <p class="small text-warning mt-2 mb-0"><strong>Return Requested:</strong> {{ card.order.return_reason|default:"Yes" }}</p>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-box">
+      <h4>No orders yet</h4>
+      <p>Place your first order from the shop page.</p>
+      <a href="{% url 'shop' %}" class="btn btn-primary">Go To Shop</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

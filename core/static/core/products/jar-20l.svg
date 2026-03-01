@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#08b7d7"/>
+      <stop offset="100%" stop-color="#1660d6"/>
+    </linearGradient>
+    <linearGradient id="drop" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#08b7d7"/>
+      <stop offset="100%" stop-color="#0b6ef6"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="650" fill="url(#bg)"/>
+  <rect x="28" y="26" width="260" height="90" rx="18" fill="#ffffff" opacity="0.95"/>
+  <circle cx="74" cy="71" r="28" fill="#eef7ff"/>
+  <path d="M74 47c-8 12-13 20-13 28a13 13 0 0 0 26 0c0-8-5-16-13-28z" fill="url(#drop)"/>
+  <text x="112" y="77" font-family="Arial" font-size="28" fill="#0f1d40" font-weight="700">WaterSupply</text>
+  <ellipse cx="450" cy="145" rx="170" ry="65" fill="#ffffff"/>
+  <rect x="280" y="145" width="340" height="330" rx="42" fill="#ffffff"/>
+  <ellipse cx="450" cy="475" rx="170" ry="65" fill="#ebf6ff"/>
+  <rect x="330" y="260" width="240" height="95" rx="16" fill="#0b6ef6"/>
+  <text x="450" y="320" font-family="Arial" font-size="46" text-anchor="middle" fill="#ffffff">20L</text>
+  <text x="450" y="585" font-family="Arial" font-size="52" text-anchor="middle" fill="#ffffff">WaterSupply Jar</text>
+</svg>

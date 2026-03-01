@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <style>
+      .title { font: 700 34px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 500 18px 'Segoe UI', Arial, sans-serif; fill: #334155; }
+      .boxTitle { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .boxText { font: 500 15px 'Segoe UI', Arial, sans-serif; fill: #1f2937; }
+      .small { font: 500 13px 'Segoe UI', Arial, sans-serif; fill: #334155; }
+      .arrowText { font: 600 13px 'Segoe UI', Arial, sans-serif; fill: #475569; }
+    </style>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L12,6 L0,12 z" fill="#64748b" />
+    </marker>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#eef2ff"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="900" fill="url(#bg)" />
+
+  <text x="60" y="60" class="title">WaterSupply Django Project Architecture</text>
+  <text x="60" y="92" class="subtitle">Monolithic server-rendered e-commerce system (Django 6, SQLite)</text>
+
+  <rect x="70" y="150" rx="16" ry="16" width="340" height="200" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="95" y="185" class="boxTitle">Presentation Layer</text>
+  <text x="95" y="218" class="boxText">Templates:</text>
+  <text x="95" y="242" class="small">core/templates/core/*.html</text>
+  <text x="95" y="266" class="small">core/templates/registration/*.html</text>
+  <text x="95" y="298" class="boxText">Static:</text>
+  <text x="95" y="322" class="small">core/static/core/styles.css + SVG assets</text>
+
+  <rect x="470" y="150" rx="16" ry="16" width="420" height="260" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="495" y="185" class="boxTitle">Application Layer (core app)</text>
+  <text x="495" y="218" class="small">Routing: core/urls.py</text>
+  <text x="495" y="242" class="small">Views: core/views.py (FBVs + helpers)</text>
+  <text x="495" y="266" class="small">Forms/Auth: core/forms.py</text>
+  <text x="495" y="290" class="small">Error handlers: core/error_views.py</text>
+  <text x="495" y="322" class="boxText">Main flows:</text>
+  <text x="495" y="346" class="small">Login/Signup, Profile, Shop, Cart, Checkout, Orders, Tracking</text>
+  <text x="495" y="370" class="small">Email verification + password reset</text>
+
+  <rect x="950" y="150" rx="16" ry="16" width="360" height="260" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="975" y="185" class="boxTitle">Infrastructure/Config</text>
+  <text x="975" y="218" class="small">watersupply/settings.py</text>
+  <text x="975" y="242" class="small">watersupply/urls.py</text>
+  <text x="975" y="266" class="small">Security flags in production mode</text>
+  <text x="975" y="290" class="small">Email backend: console (dev)</text>
+  <text x="975" y="314" class="small">WSGI/ASGI entrypoints</text>
+
+  <rect x="240" y="470" rx="16" ry="16" width="960" height="290" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="270" y="505" class="boxTitle">Domain & Data Layer (core/models.py)</text>
+
+  <rect x="280" y="530" rx="10" ry="10" width="260" height="90" fill="#f8fafc" stroke="#dbeafe"/>
+  <text x="300" y="560" class="boxText">Catalog</text>
+  <text x="300" y="585" class="small">Category -> Product</text>
+
+  <rect x="570" y="530" rx="10" ry="10" width="300" height="90" fill="#f8fafc" stroke="#dbeafe"/>
+  <text x="590" y="560" class="boxText">Shopping Cart</text>
+  <text x="590" y="585" class="small">User -> Cart -> CartItem -> Product</text>
+
+  <rect x="900" y="530" rx="10" ry="10" width="260" height="90" fill="#f8fafc" stroke="#dbeafe"/>
+  <text x="920" y="560" class="boxText">Orders</text>
+  <text x="920" y="585" class="small">Order -> OrderItem -> Product</text>
+
+  <rect x="360" y="650" rx="10" ry="10" width="320" height="90" fill="#f8fafc" stroke="#dbeafe"/>
+  <text x="380" y="680" class="boxText">User Profile</text>
+  <text x="380" y="705" class="small">User 1:1 UserProfile</text>
+
+  <rect x="730" y="650" rx="10" ry="10" width="320" height="90" fill="#f8fafc" stroke="#dbeafe"/>
+  <text x="750" y="680" class="boxText">Promotions</text>
+  <text x="750" y="705" class="small">Coupon applied at checkout</text>
+
+  <rect x="70" y="780" rx="12" ry="12" width="1240" height="80" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="95" y="812" class="boxTitle">Signals & Jobs</text>
+  <text x="95" y="838" class="small">core/signals.py: post_save(User) -> create profile | post_save(Order) -> send order update email</text>
+
+  <line x1="410" y1="250" x2="470" y2="250" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="420" y="238" class="arrowText">HTTP</text>
+
+  <line x1="890" y1="280" x2="950" y2="280" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="900" y="268" class="arrowText">settings</text>
+
+  <line x1="680" y1="410" x2="680" y2="470" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="693" y="445" class="arrowText">ORM</text>
+
+  <line x1="1020" y1="620" x2="1020" y2="780" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="1032" y="706" class="arrowText">post_save</text>
+</svg>

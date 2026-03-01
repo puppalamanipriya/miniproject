@@ -1,0 +1,48 @@
+{% extends "core/base.html" %}
+
+{% block title %}WaterSupply | Track Order{% endblock %}
+
+{% block content %}
+<section class="container pb-5">
+  <div class="page-head">
+    <h1>Track Order #{{ order.id }}</h1>
+    <p>Live location and delivery progress for your order.</p>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="order-card">
+        <h5 class="mb-2">Tracking Status: {{ tracking.status }}</h5>
+        <p class="mb-1"><strong>Current Location:</strong> {{ tracking.location }}</p>
+        <div class="progress mb-3" role="progressbar" aria-label="Tracking progress" aria-valuenow="{{ tracking.progress }}" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar" style="width: {{ tracking.progress }}%">{{ tracking.progress }}%</div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-outline-primary" href="{{ map_link }}" target="_blank" rel="noopener">Current Location Map</a>
+          <a class="btn btn-outline-secondary" href="{{ delivery_map_link }}" target="_blank" rel="noopener">Delivery Address Map</a>
+          <a class="btn btn-primary" href="{{ route_map_link }}" target="_blank" rel="noopener">Route To Delivery</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="order-card">
+        <h5>Delivery Address</h5>
+        <p class="mb-1">{{ order.delivery_name }}</p>
+        <p class="mb-1">{{ order.delivery_phone }}</p>
+        <p class="mb-1">{{ order.delivery_address }}</p>
+        <p class="mb-0">{{ order.delivery_city }} - {{ order.delivery_pincode }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="order-card mt-3">
+    <h5>Order Items</h5>
+    <ul class="mb-0">
+      {% for item in order.items.all %}
+        <li>{{ item.product.name }} {{ item.product.volume_label }} x {{ item.quantity }} (Rs. {{ item.unit_price }})</li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endblock %}

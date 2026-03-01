@@ -1,0 +1,192 @@
+{% extends "core/base.html" %}
+
+{% block title %}WaterSupply | Signup{% endblock %}
+
+{% block content %}
+<section class="container auth-shell pb-5">
+  <div class="auth-wrap">
+    <div class="auth-side">
+      <p class="auth-kicker">New Here?</p>
+      <h1>Create Your Account</h1>
+      <p>Register once and manage all your WaterSupply orders in one secure account.</p>
+      <div class="auth-bullets">
+        <span>Quick account creation</span>
+        <span>Email verification support</span>
+        <span>Easy login with email or username</span>
+      </div>
+    </div>
+    <div class="auth-panel signup-card">
+      <h2>Sign Up</h2>
+      <p class="auth-panel-text">Create your account, then log in to continue.</p>
+      <form method="post" class="mt-4">
+          {% csrf_token %}
+
+          <div class="mb-3 signup-field">
+            <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+            <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="mb-3 signup-field">
+            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+            <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="mb-3 signup-field">
+            <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
+            <div class="input-group">
+              {{ form.password1 }}
+              <button
+                type="button"
+                class="btn btn-outline-secondary password-toggle-btn"
+                data-toggle-password="{{ form.password1.id_for_label }}"
+                aria-label="Show password"
+              >
+                Show
+              </button>
+            </div>
+            <div class="password-strength-wrap mt-2">
+              <div id="password-strength-label" class="password-strength-label">Strength: Too weak</div>
+              <ul class="password-hints mb-0">
+                <li id="hint-length">At least 8 characters</li>
+                <li id="hint-upper">At least 1 uppercase letter</li>
+                <li id="hint-lower">At least 1 lowercase letter</li>
+                <li id="hint-number">At least 1 number</li>
+                <li id="hint-symbol">At least 1 special character</li>
+              </ul>
+            </div>
+            {% if form.password1.errors %}
+            <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="mb-3 signup-field">
+            <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password</label>
+            <div class="input-group">
+              {{ form.password2 }}
+              <button
+                type="button"
+                class="btn btn-outline-secondary password-toggle-btn"
+                data-toggle-password="{{ form.password2.id_for_label }}"
+                aria-label="Show password"
+              >
+                Show
+              </button>
+            </div>
+            <p id="password-match-hint" class="password-match-hint mb-0 mt-2">Passwords must match.</p>
+            {% if form.password2.errors %}
+            <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
+            {% endif %}
+          </div>
+
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger py-2" role="alert">
+            {{ form.non_field_errors }}
+          </div>
+          {% endif %}
+
+          <button type="submit" class="btn btn-primary btn-signup w-100">Create Account</button>
+      </form>
+      <p class="mt-4 mb-0 text-center signup-switch">
+        Already have an account? <a href="{% url 'login' %}">Login</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  (function () {
+    const toggleButtons = document.querySelectorAll("[data-toggle-password]");
+    toggleButtons.forEach((button) => {
+      const inputId = button.getAttribute("data-toggle-password");
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      button.addEventListener("click", function () {
+        const show = input.type === "password";
+        input.type = show ? "text" : "password";
+        button.textContent = show ? "Hide" : "Show";
+        button.setAttribute("aria-label", show ? "Hide password" : "Show password");
+      });
+    });
+
+    const password1 = document.getElementById("{{ form.password1.id_for_label }}");
+    const password2 = document.getElementById("{{ form.password2.id_for_label }}");
+    const strengthLabel = document.getElementById("password-strength-label");
+    const matchHint = document.getElementById("password-match-hint");
+    if (!password1 || !password2 || !strengthLabel || !matchHint) return;
+
+    const hints = {
+      length: document.getElementById("hint-length"),
+      upper: document.getElementById("hint-upper"),
+      lower: document.getElementById("hint-lower"),
+      number: document.getElementById("hint-number"),
+      symbol: document.getElementById("hint-symbol")
+    };
+
+    function setHint(el, ok) {
+      if (!el) return;
+      el.classList.toggle("met", ok);
+    }
+
+    function updateStrength() {
+      const value = password1.value || "";
+      const checks = {
+        length: value.length >= 8,
+        upper: /[A-Z]/.test(value),
+        lower: /[a-z]/.test(value),
+        number: /[0-9]/.test(value),
+        symbol: /[^A-Za-z0-9]/.test(value)
+      };
+
+      setHint(hints.length, checks.length);
+      setHint(hints.upper, checks.upper);
+      setHint(hints.lower, checks.lower);
+      setHint(hints.number, checks.number);
+      setHint(hints.symbol, checks.symbol);
+
+      const score = Object.values(checks).filter(Boolean).length;
+      strengthLabel.classList.remove("weak", "medium", "strong");
+      if (score <= 2) {
+        strengthLabel.textContent = "Strength: Too weak";
+        strengthLabel.classList.add("weak");
+      } else if (score <= 4) {
+        strengthLabel.textContent = "Strength: Medium";
+        strengthLabel.classList.add("medium");
+      } else {
+        strengthLabel.textContent = "Strength: Strong";
+        strengthLabel.classList.add("strong");
+      }
+    }
+
+    function updateMatch() {
+      const first = password1.value || "";
+      const second = password2.value || "";
+      matchHint.classList.remove("ok", "not-ok");
+      if (!second) {
+        matchHint.textContent = "Passwords must match.";
+        return;
+      }
+      if (first === second) {
+        matchHint.textContent = "Passwords match.";
+        matchHint.classList.add("ok");
+      } else {
+        matchHint.textContent = "Passwords do not match.";
+        matchHint.classList.add("not-ok");
+      }
+    }
+
+    password1.addEventListener("input", function () {
+      updateStrength();
+      updateMatch();
+    });
+    password2.addEventListener("input", updateMatch);
+
+    updateStrength();
+    updateMatch();
+  })();
+</script>
+{% endblock %}

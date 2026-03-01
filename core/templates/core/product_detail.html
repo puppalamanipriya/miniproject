@@ -1,0 +1,32 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}WaterSupply | {{ product.name }}{% endblock %}
+
+{% block content %}
+<section class="container pb-5">
+  <div class="row g-4 align-items-center">
+    <div class="col-lg-6">
+      <div class="detail-image-wrap">
+        <img class="detail-image" src="{{ product.resolved_image_url }}" alt="{{ product.name }}">
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <p class="volume-pill">{{ product.volume_label }}</p>
+      <p class="brand-chip mb-2"><img src="{% static 'core/watersupply-logo-mark.svg' %}" alt="logo"> WaterSupply Branded</p>
+      <h1>{{ product.name }}</h1>
+      <p class="lead">{{ product.description }}</p>
+      <p class="detail-price">Rs. {{ product.price }}</p>
+      <p class="stock-text mb-4">{{ product.stock_quantity }} unit(s) available</p>
+
+      <form method="post" action="{% url 'add_to_cart' product.id %}" class="d-flex flex-wrap gap-2 mb-3">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'product_detail' product.id %}">
+        <input class="form-control qty-field" type="number" name="quantity" min="1" max="{{ product.stock_quantity }}" value="1">
+        <button class="btn btn-primary">Add To Cart</button>
+        <a href="{% url 'shop' %}" class="btn btn-outline-secondary">Back To Shop</a>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "core/base.html" %}
+
+{% block title %}WaterSupply | Cart{% endblock %}
+
+{% block content %}
+<section class="container pb-5">
+  <div class="page-head">
+    <h1>My Cart</h1>
+    <p>Update quantity for each water bottle before checkout.</p>
+  </div>
+
+  {% if cart_items %}
+    <div class="cart-table-wrap">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart_items %}
+            <tr>
+              <td>
+                <strong>{{ item.product.name }}</strong><br>
+                <span class="small text-muted">{{ item.product.volume_label }}</span>
+              </td>
+              <td>Rs. {{ item.product.price }}</td>
+              <td>
+                <form method="post" action="{% url 'update_cart' item.product.id %}" class="d-flex gap-2">
+                  {% csrf_token %}
+                  <input class="form-control qty-field" type="number" name="quantity" min="0" max="{{ item.product.stock_quantity }}" value="{{ item.quantity }}">
+                  <button class="btn btn-outline-primary btn-sm">Update</button>
+                </form>
+              </td>
+              <td>Rs. {{ item.subtotal }}</td>
+              <td>
+                <form method="post" action="{% url 'remove_from_cart' item.product.id %}">
+                  {% csrf_token %}
+                  <button class="btn btn-outline-danger btn-sm">Remove</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mt-4">
+      <a href="{% url 'shop' %}" class="btn btn-outline-secondary">Continue Shopping</a>
+      {% if user.is_authenticated %}
+      <div class="checkout-box w-100">
+        <h4 class="mb-3">Total: Rs. {{ cart_total }}</h4>
+        <form method="post" action="{% url 'checkout' %}" class="row g-2">
+          {% csrf_token %}
+          <div class="col-md-6">
+            <input type="text" name="delivery_name" class="form-control" placeholder="Full Name" required>
+          </div>
+          <div class="col-md-6">
+            <input type="text" name="delivery_phone" class="form-control" placeholder="Phone Number" required>
+          </div>
+          <div class="col-12">
+            <input type="text" name="delivery_address" class="form-control" placeholder="Street Address" required>
+          </div>
+          <div class="col-md-6">
+            <input type="text" name="delivery_city" class="form-control" placeholder="City" required>
+          </div>
+          <div class="col-md-6">
+            <input type="text" name="delivery_pincode" class="form-control" placeholder="Pincode" required>
+          </div>
+          <div class="col-md-6">
+            <input type="text" name="coupon_code" class="form-control" placeholder="Coupon Code (optional)">
+          </div>
+          <div class="col-md-6">
+            <select name="payment_method" class="form-select" required>
+              <option value="cod">Cash on Delivery</option>
+              <option value="razorpay">Razorpay (demo)</option>
+              <option value="stripe">Stripe (demo)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <select name="fulfillment_type" class="form-select" required>
+              <option value="one_time">One-time purchase</option>
+              <option value="weekly">Weekly subscription</option>
+              <option value="monthly">Monthly subscription</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <small class="text-muted">
+              Weekly/monthly creates a recurring subscription and places this cart as the first order.
+            </small>
+          </div>
+          <div class="col-12">
+            <button class="btn btn-success">Place Order</button>
+          </div>
+        </form>
+      </div>
+      {% else %}
+      <div class="checkout-box w-100">
+        <h4 class="mb-3">Total: Rs. {{ cart_total }}</h4>
+        <p class="text-muted mb-3">Login to place your order. Your current cart will be kept.</p>
+        <a href="{% url 'login' %}?next={% url 'cart' %}" class="btn btn-primary">Login To Checkout</a>
+      </div>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="empty-box">
+      <h4>Your cart is empty</h4>
+      <p>Add bottles from the shop to place an order.</p>
+      <a href="{% url 'shop' %}" class="btn btn-primary">Browse Bottles</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

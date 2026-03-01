@@ -1,0 +1,137 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}WaterSupply | Shop{% endblock %}
+
+{% block content %}
+<section class="container pb-5">
+  <div class="page-head">
+    <h1>Shop Water Bottles</h1>
+    <p>See full water details, pick your quantity, and add directly to cart.</p>
+  </div>
+
+  <section class="brand-gallery mb-4" aria-label="Popular bottled water brands">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <h2 class="h4 mb-0">Popular Water Bottle Brands</h2>
+      <p class="small text-muted mb-0">Bisleri, Tata, Kinley, Aquafina, and more</p>
+    </div>
+    <div class="row g-3">
+      <div class="col-6 col-md-4 col-lg-2">
+        <article class="brand-gallery-card h-100">
+          <img src="{% static 'core/products/photos/bottle-medium-photo.png' %}" alt="Bisleri water bottle">
+          <h3>Bisleri</h3>
+        </article>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <article class="brand-gallery-card h-100">
+          <img src="{% static 'core/products/photos/bottle-large-photo.png' %}" alt="Tata Copper Plus water bottle">
+          <h3>Tata Copper Plus</h3>
+        </article>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <article class="brand-gallery-card h-100">
+          <img src="{% static 'core/products/photos/bottle-small-photo.png' %}" alt="Kinley water bottle">
+          <h3>Kinley</h3>
+        </article>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <article class="brand-gallery-card h-100">
+          <img src="{% static 'core/products/photos/pack-photo.png' %}" alt="Aquafina water bottles pack">
+          <h3>Aquafina</h3>
+        </article>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <article class="brand-gallery-card h-100">
+          <img src="{% static 'core/products/photos/can-photo.png' %}" alt="Bailey packaged drinking water can">
+          <h3>Bailey</h3>
+        </article>
+      </div>
+      <div class="col-6 col-md-4 col-lg-2">
+        <article class="brand-gallery-card h-100">
+          <img src="{% static 'core/products/photos/jar-photo.png' %}" alt="Rail Neer packaged drinking water jar">
+          <h3>Rail Neer</h3>
+        </article>
+      </div>
+    </div>
+  </section>
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-md-4">
+      <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Search products">
+    </div>
+    <div class="col-md-3">
+      <select class="form-select" name="category">
+        <option value="">All categories</option>
+        {% for category in categories %}
+          <option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select class="form-select" name="sort">
+        <option value="">Default sort</option>
+        <option value="price_asc" {% if selected_sort == "price_asc" %}selected{% endif %}>Price low to high</option>
+        <option value="price_desc" {% if selected_sort == "price_desc" %}selected{% endif %}>Price high to low</option>
+        <option value="name_asc" {% if selected_sort == "name_asc" %}selected{% endif %}>Name A-Z</option>
+        <option value="stock_desc" {% if selected_sort == "stock_desc" %}selected{% endif %}>Highest stock</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-primary w-100">Apply</button>
+    </div>
+  </form>
+
+  <div class="row g-4">
+    {% for product in products %}
+      <div class="col-md-6 col-lg-4">
+        <div class="product-card h-100">
+          <div class="product-image-wrap">
+            <img src="{{ product.resolved_image_url }}" alt="{{ product.name }}">
+          </div>
+          <div class="p-3 d-flex flex-column h-100">
+            <div class="d-flex justify-content-between mb-2">
+              <p class="volume-pill">{{ product.volume_label }}</p>
+              <span class="stock-text">{{ product.stock_quantity }} in stock</span>
+            </div>
+            {% if product.is_low_stock %}
+              <p class="small text-danger mb-2">Low stock alert</p>
+            {% endif %}
+            <p class="brand-chip mb-2"><img src="{% static 'core/watersupply-logo-mark.svg' %}" alt="logo"> WaterSupply Branded Bottle</p>
+            <h5>{{ product.name }}</h5>
+            <p class="text-muted small">{{ product.description|default:"Clean and safe drinking water for daily use." }}</p>
+            <ul class="small text-muted ps-3 mb-3">
+              <li>Category: {{ product.category.name|default:"Drinking Water" }}</li>
+              <li>Pack size: {{ product.volume_label }}</li>
+              <li>Availability: {{ product.stock_quantity }} units</li>
+            </ul>
+            <div class="mt-auto">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <strong>Rs. {{ product.price }}</strong>
+                <span class="small text-success">Fresh stock</span>
+              </div>
+              <form id="add-to-cart-{{ product.id }}" method="post" action="{% url 'add_to_cart' product.id %}" class="d-flex gap-2 mb-2">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'shop' %}">
+                <input
+                  class="form-control"
+                  type="number"
+                  name="quantity"
+                  min="1"
+                  max="{{ product.stock_quantity|default:1 }}"
+                  value="1"
+                  {% if product.stock_quantity <= 0 %}disabled{% endif %}
+                >
+                <button class="btn btn-primary w-100" type="submit" {% if product.stock_quantity <= 0 %}disabled{% endif %}>
+                  {% if product.stock_quantity > 0 %}Add to Cart{% else %}Out of Stock{% endif %}
+                </button>
+              </form>
+              <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-primary w-100">View Full Water Details</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No products available right now.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "core/base.html" %}
+
+{% block title %}WaterSupply | Login{% endblock %}
+
+{% block content %}
+<section class="container auth-shell pb-5">
+  <div class="auth-wrap">
+    <div class="auth-side">
+      <p class="auth-kicker">Customer Portal</p>
+      <h1>Welcome Back</h1>
+      <p>Track deliveries, manage profile details, and reorder quickly from one dashboard.</p>
+      <div class="auth-bullets">
+        <span>Live order tracking</span>
+        <span>Secure checkout history</span>
+        <span>Fast repeat ordering</span>
+      </div>
+    </div>
+    <div class="auth-panel">
+      <h2>Login</h2>
+      <p class="auth-panel-text">Sign in with your username or email.</p>
+      <form method="post" class="mt-3">
+          {% csrf_token %}
+          {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+          {% endif %}
+
+          <div class="mb-3 signup-field">
+            <label for="{{ form.username.id_for_label }}" class="form-label">Username or Email</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+            <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="mb-3 signup-field">
+            <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+            <div class="input-group">
+              {{ form.password }}
+              <button
+                type="button"
+                class="btn btn-outline-secondary password-toggle-btn"
+                data-toggle-password="{{ form.password.id_for_label }}"
+                aria-label="Show password"
+              >
+                Show
+              </button>
+            </div>
+            {% if form.password.errors %}
+            <div class="text-danger small mt-1">{{ form.password.errors }}</div>
+            {% endif %}
+          </div>
+
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger py-2" role="alert">
+            {{ form.non_field_errors }}
+          </div>
+          {% endif %}
+
+          <button type="submit" class="btn btn-primary btn-signup w-100">Login</button>
+      </form>
+      <p class="mt-3 mb-0 text-center">
+        <a href="{% url 'password_reset' %}">Forgot password?</a>
+      </p>
+      <p class="mt-3 mb-0 text-center signup-switch">
+        New user? <a href="{% url 'signup' %}">Create an account</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  (function () {
+    const toggleButtons = document.querySelectorAll("[data-toggle-password]");
+    toggleButtons.forEach((button) => {
+      const inputId = button.getAttribute("data-toggle-password");
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      button.addEventListener("click", function () {
+        const show = input.type === "password";
+        input.type = show ? "text" : "password";
+        button.textContent = show ? "Hide" : "Show";
+        button.setAttribute("aria-label", show ? "Hide password" : "Show password");
+      });
+    });
+  })();
+</script>
+{% endblock %}

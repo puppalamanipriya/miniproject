@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#65ccff"/>
+      <stop offset="100%" stop-color="#0054c5"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="650" fill="url(#bg)"/>
+  <rect x="70" y="40" width="280" height="92" rx="16" fill="#fff" opacity=".95"/>
+  <text x="210" y="95" text-anchor="middle" font-family="Arial" font-size="34" fill="#0e3f7f" font-weight="700">WaterSupply</text>
+  <ellipse cx="450" cy="158" rx="172" ry="64" fill="#f9fdff"/>
+  <rect x="278" y="158" width="344" height="332" rx="44" fill="#f3fbff"/>
+  <ellipse cx="450" cy="490" rx="172" ry="64" fill="#e7f7ff"/>
+  <rect x="330" y="275" width="240" height="106" rx="18" fill="#0b6ef6"/>
+  <text x="450" y="345" text-anchor="middle" font-family="Arial" font-size="56" fill="#fff" font-weight="700">20L</text>
+  <text x="450" y="602" text-anchor="middle" font-family="Arial" font-size="52" fill="#fff" font-weight="700">Dispenser Jar</text>
+</svg>

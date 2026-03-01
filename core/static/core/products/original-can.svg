@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5bb6ff"/>
+      <stop offset="100%" stop-color="#003d91"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="650" fill="url(#bg)"/>
+  <rect x="70" y="40" width="280" height="92" rx="16" fill="#fff" opacity=".95"/>
+  <text x="210" y="95" text-anchor="middle" font-family="Arial" font-size="34" fill="#0e3f7f" font-weight="700">WaterSupply</text>
+  <rect x="245" y="145" width="410" height="345" rx="42" fill="#f8fdff"/>
+  <rect x="410" y="90" width="80" height="65" rx="14" fill="#d6eeff"/>
+  <rect x="285" y="285" width="330" height="112" rx="18" fill="#0b6ef6"/>
+  <text x="450" y="355" text-anchor="middle" font-family="Arial" font-size="50" fill="#fff" font-weight="700">3L-10L</text>
+  <text x="450" y="602" text-anchor="middle" font-family="Arial" font-size="52" fill="#fff" font-weight="700">Water Can</text>
+</svg>

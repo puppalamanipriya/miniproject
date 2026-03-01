@@ -1,0 +1,93 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}WaterSupply | Home{% endblock %}
+
+{% block content %}
+<section class="hero-wrap">
+  <div class="container">
+    <div class="hero-card">
+      <img src="{% static 'core/watersupply-logo-title.svg' %}" alt="WaterSupply title logo" class="hero-title-logo">
+      <p class="hero-kicker">Pure Water Marketplace</p>
+      <h1>Colorful bottle store with every quantity you need</h1>
+      <p class="hero-text">Shop 250ml, 500ml, 1L, 2L, 5L and bulk can options in one place.</p>
+      <div class="d-flex flex-wrap gap-3 mt-4">
+        <a href="{% url 'shop' %}" class="btn btn-hero-main">Shop Bottles</a>
+        <a href="{% url 'orders' %}" class="btn btn-hero-alt">View Orders</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container py-5">
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="metric-card">
+        <h3>{{ total_products }}</h3>
+        <p>Products Available</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="metric-card">
+        <h3>{{ cart_count }}</h3>
+        <p>Items In Cart</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="metric-card">
+        <h3>Fast</h3>
+        <p>Doorstep Delivery</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container pb-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="section-title mb-0">Featured Water Bottles</h2>
+    <a class="link-highlight" href="{% url 'shop' %}">See all products</a>
+  </div>
+  <div class="row g-4">
+    {% for product in featured_products %}
+      <div class="col-md-6 col-lg-4">
+        <div class="product-card h-100">
+          <div class="product-image-wrap">
+            <img src="{{ product.resolved_image_url }}" alt="{{ product.name }}">
+          </div>
+          <div class="p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <p class="volume-pill mb-0">{{ product.volume_label }}</p>
+              <span class="brand-chip"><img src="{% static 'core/watersupply-logo-mark.svg' %}" alt="logo"> WaterSupply</span>
+            </div>
+            <h5>{{ product.name }}</h5>
+            <p class="text-muted small">{{ product.description }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <strong>Rs. {{ product.price }}</strong>
+              <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-primary">Details</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No featured products yet. Add products from admin.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{% if latest_orders %}
+<section class="container pb-5">
+  <h2 class="section-title mb-3">Recent Orders</h2>
+  <div class="row g-3">
+    {% for order in latest_orders %}
+      <div class="col-md-4">
+        <div class="order-snap">
+          <h6>Order #{{ order.id }}</h6>
+          <p class="small mb-2">{{ order.created_at|date:"d M Y, h:i A" }}</p>
+          <p class="mb-0 fw-semibold">Total: Rs. {{ order.total_amount }}</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}
