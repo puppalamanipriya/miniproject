@@ -197,6 +197,7 @@ def _create_payment_transaction(order):
     )
 
 
+@login_required
 def home(request):
     cart_count = _cart_count(request)
     latest_orders = []
