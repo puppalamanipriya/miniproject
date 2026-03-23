@@ -7,6 +7,7 @@ from .models import (
     Coupon,
     Order,
     OrderItem,
+    PaymentTransaction,
     Product,
     Subscription,
     SubscriptionItem,
@@ -111,3 +112,10 @@ class CartAdmin(admin.ModelAdmin):
 @admin.register(CartItem)
 class CartItemAdmin(admin.ModelAdmin):
     list_display = ("cart", "product", "quantity")
+
+
+@admin.register(PaymentTransaction)
+class PaymentTransactionAdmin(admin.ModelAdmin):
+    list_display = ("reference", "order", "provider", "status", "amount", "provider_payment_id", "created_at")
+    list_filter = ("provider", "status")
+    search_fields = ("reference", "provider_payment_id", "order__invoice_number")

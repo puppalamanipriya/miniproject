@@ -1,0 +1,34 @@
+@startuml
+actor User
+participant "Django Views" as Web
+participant "Database" as DB
+participant "Payment Provider" as Provider
+
+User -> Web: POST /checkout
+Web -> DB: Load cart items
+DB --> Web: cart items + subtotal
+Web -> DB: Validate coupon (optional)
+DB --> Web: coupon or none
+Web -> DB: Create Order
+Web -> DB: Create OrderItems (bulk)
+Web -> DB: Clear Cart
+
+opt Subscription (weekly/monthly)
+  Web -> DB: Create Subscription
+  Web -> DB: Create SubscriptionItems
+end
+
+alt Payment method = COD
+  Web --> User: Redirect /orders (success)
+else Payment method = Online
+  Web -> DB: Create PaymentTransaction
+  Web --> User: Redirect /orders/{id}/payment
+  User -> Web: POST /orders/{id}/payment/process
+  Web -> Provider: Simulated payment
+  Provider --> Web: success/failure
+  Web -> DB: Update PaymentTransaction
+  Web -> DB: Update Order.payment_status
+  Web --> User: Redirect /orders or /payment
+end
+
+@enduml

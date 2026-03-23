@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.templatetags.static import static
+from django.utils import timezone
 
 
 class Category(models.Model):
@@ -225,3 +226,60 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"Profile({self.user.username})"
+
+
+class PaymentTransaction(models.Model):
+    STATUS_INITIATED = "initiated"
+    STATUS_SUCCESS = "success"
+    STATUS_FAILED = "failed"
+    STATUS_CHOICES = (
+        (STATUS_INITIATED, "Initiated"),
+        (STATUS_SUCCESS, "Success"),
+        (STATUS_FAILED, "Failed"),
+    )
+
+    order = models.ForeignKey(Order, related_name="payments", on_delete=models.CASCADE)
+    provider = models.CharField(max_length=20, choices=Order.PAYMENT_CHOICES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_INITIATED)
+    reference = models.CharField(max_length=64, unique=True)
+    provider_payment_id = models.CharField(max_length=120, blank=True)
+    failure_reason = models.CharField(max_length=255, blank=True)
+    gateway_response = models.JSONField(default=dict, blank=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def mark_success(self, provider_payment_id="", gateway_response=None):
+        self.status = self.STATUS_SUCCESS
+        self.provider_payment_id = provider_payment_id
+        self.failure_reason = ""
+        self.gateway_response = gateway_response or {}
+        self.paid_at = timezone.now()
+        self.save(
+            update_fields=[
+                "status",
+                "provider_payment_id",
+                "failure_reason",
+                "gateway_response",
+                "paid_at",
+                "updated_at",
+            ]
+        )
+        self.order.payment_status = Order.PAYMENT_PAID
+        self.order.save(update_fields=["payment_status"])
+
+    def mark_failed(self, reason="", gateway_response=None):
+        self.status = self.STATUS_FAILED
+        self.failure_reason = reason
+        self.gateway_response = gateway_response or {}
+        self.paid_at = None
+        self.save(update_fields=["status", "failure_reason", "gateway_response", "paid_at", "updated_at"])
+        self.order.payment_status = Order.PAYMENT_FAILED
+        self.order.save(update_fields=["payment_status"])
+
+    def __str__(self):
+        return f"{self.get_provider_display()} payment #{self.reference}"

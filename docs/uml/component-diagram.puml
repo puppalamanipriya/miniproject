@@ -1,0 +1,26 @@
+@startuml
+skinparam componentStyle rectangle
+
+actor "User Browser" as Browser
+component "Django App" as App {
+  component "Views" as Views
+  component "Templates" as Templates
+  component "Forms" as Forms
+  component "Models" as Models
+}
+
+database "SQLite (db.sqlite3)" as DB
+component "Email Service" as Email
+component "Payment Provider" as Pay
+component "Static Assets" as Static
+
+Browser --> Views : HTTP requests
+Views --> Templates : render
+Views --> Forms : validate
+Views --> Models : ORM
+Models --> DB
+Views --> Email : verification emails
+Views --> Pay : payment flow (demo)
+Templates --> Static : CSS/Images
+
+@enduml

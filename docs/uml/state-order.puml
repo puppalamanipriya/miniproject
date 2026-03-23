@@ -1,0 +1,26 @@
+@startuml
+[*] --> Placed
+Placed --> Packed
+Packed --> OutForDelivery
+OutForDelivery --> Delivered
+Placed --> Cancelled
+Packed --> Cancelled
+OutForDelivery --> Cancelled
+Delivered --> [*]
+Cancelled --> [*]
+
+state "Placed" as Placed
+state "Packed" as Packed
+state "Out For Delivery" as OutForDelivery
+state "Delivered" as Delivered
+state "Cancelled" as Cancelled
+
+state "Payment" as Payment {
+  [*] --> Pending
+  Pending --> Paid
+  Pending --> Failed
+  Failed --> Pending : Retry
+  Paid --> [*]
+}
+
+@enduml

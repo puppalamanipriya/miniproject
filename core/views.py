@@ -1,5 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal
+from uuid import uuid4
 from urllib.parse import quote_plus
 
 from django.conf import settings
@@ -26,6 +27,7 @@ from .models import (
     Coupon,
     Order,
     OrderItem,
+    PaymentTransaction,
     Product,
     Subscription,
     SubscriptionItem,
@@ -185,6 +187,16 @@ def _send_verification_email(request, user):
     )
 
 
+def _create_payment_transaction(order):
+    reference = f"PAY-{timezone.now().strftime('%Y%m%d%H%M%S')}-{uuid4().hex[:10].upper()}"
+    return PaymentTransaction.objects.create(
+        order=order,
+        provider=order.payment_method,
+        amount=order.total_amount,
+        reference=reference,
+    )
+
+
 def home(request):
     cart_count = _cart_count(request)
     latest_orders = []
@@ -293,6 +305,11 @@ def orders_page(request):
                 "tracking": tracking,
                 "map_link": _maps_search_link(tracking["location_query"]),
                 "delivery_map_link": _maps_search_link(destination),
+                "pending_online_payment": (
+                    order.payment_status != Order.PAYMENT_PAID
+                    and order.payment_method in (Order.PAYMENT_RAZORPAY, Order.PAYMENT_STRIPE)
+                    and order.tracking_status != Order.STATUS_CANCELLED
+                ),
             }
         )
     return render(
@@ -449,6 +466,10 @@ def checkout(request):
     if fulfillment_type not in allowed_fulfillment_types:
         fulfillment_type = Order.FULFILLMENT_ONE_TIME
 
+    allowed_payment_methods = {choice[0] for choice in Order.PAYMENT_CHOICES}
+    if payment_method not in allowed_payment_methods:
+        payment_method = Order.PAYMENT_COD
+
     if not all([delivery_name, delivery_phone, delivery_address, delivery_city, delivery_pincode]):
         messages.error(request, "Please provide complete delivery address details.")
         return redirect("cart")
@@ -474,7 +495,7 @@ def checkout(request):
         )
 
     total = (cart_subtotal - discount_amount).quantize(Decimal("0.01"))
-    payment_status = Order.PAYMENT_PENDING if payment_method != Order.PAYMENT_COD else Order.PAYMENT_PENDING
+    payment_status = Order.PAYMENT_PENDING
 
     order = Order.objects.create(
         user=request.user,
@@ -542,13 +563,85 @@ def checkout(request):
             f"{subscription.get_frequency_display()} subscription #{subscription.id} started.",
         )
     if payment_method in (Order.PAYMENT_RAZORPAY, Order.PAYMENT_STRIPE):
+        _create_payment_transaction(order)
         messages.info(
             request,
-            f"{dict(Order.PAYMENT_CHOICES).get(payment_method)} integration requires API keys. "
-            "Order created in pending payment state.",
+            f"Order #{order.id} created. Complete your {dict(Order.PAYMENT_CHOICES).get(payment_method)} payment.",
         )
-    messages.success(request, f"Order #{order.id} placed successfully.")
+        return redirect("payment", order_id=order.id)
+    messages.success(request, f"Order #{order.id} placed successfully with Cash on Delivery.")
     return redirect("orders")
+
+
+@login_required
+def payment_page(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if order.payment_method == Order.PAYMENT_COD:
+        messages.info(request, "Cash on Delivery orders do not require online payment.")
+        return redirect("orders")
+
+    payment = order.payments.order_by("-created_at").first()
+    if not payment:
+        payment = _create_payment_transaction(order)
+
+    if order.payment_status == Order.PAYMENT_PAID:
+        messages.success(request, f"Order #{order.id} has already been paid.")
+        return redirect("orders")
+
+    return render(
+        request,
+        "core/payment.html",
+        {"order": order, "payment": payment, "cart_count": _cart_count(request)},
+    )
+
+
+@require_POST
+@login_required
+def process_payment(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if order.payment_method == Order.PAYMENT_COD:
+        messages.error(request, "Cash on Delivery orders cannot be processed online.")
+        return redirect("orders")
+
+    payment = order.payments.order_by("-created_at").first()
+    if not payment:
+        payment = _create_payment_transaction(order)
+
+    action = request.POST.get("action")
+    provider_payment_id = (request.POST.get("provider_payment_id") or "").strip()
+
+    if action == "success":
+        if not provider_payment_id:
+            provider_payment_id = f"{order.payment_method.upper()}_{uuid4().hex[:12]}"
+        payment.mark_success(
+            provider_payment_id=provider_payment_id,
+            gateway_response={"mode": "demo", "result": "success"},
+        )
+        messages.success(request, f"Payment successful for Order #{order.id}.")
+        return redirect("orders")
+
+    reason = (request.POST.get("failure_reason") or "Payment was declined in demo mode.").strip()
+    payment.mark_failed(reason=reason, gateway_response={"mode": "demo", "result": "failed"})
+    messages.error(request, f"Payment failed for Order #{order.id}. You can try again.")
+    return redirect("payment", order_id=order.id)
+
+
+@require_POST
+@login_required
+def retry_payment(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if order.payment_method == Order.PAYMENT_COD:
+        messages.error(request, "Cash on Delivery orders do not support online payment retry.")
+        return redirect("orders")
+    if order.payment_status == Order.PAYMENT_PAID:
+        messages.info(request, f"Order #{order.id} is already paid.")
+        return redirect("orders")
+
+    _create_payment_transaction(order)
+    order.payment_status = Order.PAYMENT_PENDING
+    order.save(update_fields=["payment_status"])
+    messages.info(request, f"Created a new payment attempt for Order #{order.id}.")
+    return redirect("payment", order_id=order.id)
 
 
 @require_POST

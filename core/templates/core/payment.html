@@ -1,0 +1,60 @@
+{% extends "core/base.html" %}
+
+{% block title %}WaterSupply | Payment{% endblock %}
+
+{% block content %}
+<section class="container pb-5">
+  <div class="page-head">
+    <h1>Complete Payment</h1>
+    <p>Order #{{ order.id }} using {{ order.get_payment_method_display }}.</p>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="order-card">
+        <h5 class="mb-3">Payment Summary</h5>
+        <p class="small mb-1"><strong>Reference:</strong> {{ payment.reference }}</p>
+        <p class="small mb-1"><strong>Status:</strong> {{ payment.get_status_display }}</p>
+        <p class="small mb-1"><strong>Method:</strong> {{ order.get_payment_method_display }}</p>
+        <p class="small mb-3"><strong>Amount:</strong> Rs. {{ payment.amount }}</p>
+
+        <form method="post" action="{% url 'process_payment' order.id %}" class="mb-2">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="success">
+          <div class="input-group mb-2">
+            <span class="input-group-text">Gateway Txn ID</span>
+            <input type="text" name="provider_payment_id" class="form-control" placeholder="Optional auto-generated ID">
+          </div>
+          <button class="btn btn-success">Simulate Successful Payment</button>
+        </form>
+
+        <form method="post" action="{% url 'process_payment' order.id %}" class="mb-2">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="failed">
+          <div class="input-group mb-2">
+            <span class="input-group-text">Failure Reason</span>
+            <input type="text" name="failure_reason" class="form-control" placeholder="Card declined">
+          </div>
+          <button class="btn btn-outline-danger">Simulate Failed Payment</button>
+        </form>
+
+        <form method="post" action="{% url 'retry_payment' order.id %}">
+          {% csrf_token %}
+          <button class="btn btn-outline-secondary">Create New Payment Attempt</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="order-card">
+        <h5>Order Details</h5>
+        <p class="mb-1"><strong>Invoice:</strong> {{ order.invoice_number|default:"Pending" }}</p>
+        <p class="mb-1"><strong>Delivery:</strong> {{ order.delivery_name }}</p>
+        <p class="mb-1">{{ order.delivery_address }}</p>
+        <p class="mb-1">{{ order.delivery_city }} - {{ order.delivery_pincode }}</p>
+        <p class="mb-0"><strong>Phone:</strong> {{ order.delivery_phone }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

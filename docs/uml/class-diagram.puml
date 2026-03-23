@@ -1,0 +1,134 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class User <<DjangoAuth>> {
+  +id: int
+  +username: string
+  +email: string
+}
+
+class Category {
+  +id: int
+  +name: string
+  +slug: string
+}
+
+class Product {
+  +id: int
+  +name: string
+  +volume_label: string
+  +price: decimal
+  +image_url: string
+  +description: string
+  +stock_quantity: int
+  +low_stock_threshold: int
+  +is_featured: bool
+}
+
+class Cart {
+  +id: int
+  +updated_at: datetime
+}
+
+class CartItem {
+  +id: int
+  +quantity: int
+}
+
+class Order {
+  +id: int
+  +created_at: datetime
+  +total_amount: decimal
+  +subtotal_amount: decimal
+  +discount_amount: decimal
+  +delivery_name: string
+  +delivery_phone: string
+  +delivery_address: string
+  +delivery_city: string
+  +delivery_pincode: string
+  +tracking_status: string
+  +current_location: string
+  +payment_method: string
+  +payment_status: string
+  +fulfillment_type: string
+  +coupon_code: string
+  +invoice_number: string
+  +is_return_requested: bool
+}
+
+class OrderItem {
+  +id: int
+  +quantity: int
+  +unit_price: decimal
+}
+
+class Subscription {
+  +id: int
+  +frequency: string
+  +status: string
+  +created_at: datetime
+  +start_date: date
+  +next_delivery_date: date
+  +delivery_name: string
+  +delivery_phone: string
+  +delivery_address: string
+  +delivery_city: string
+  +delivery_pincode: string
+  +payment_method: string
+}
+
+class SubscriptionItem {
+  +id: int
+  +quantity: int
+  +unit_price: decimal
+}
+
+class Coupon {
+  +id: int
+  +code: string
+  +discount_percent: int
+  +is_active: bool
+  +valid_from: datetime
+  +valid_to: datetime
+  +minimum_order_amount: decimal
+}
+
+class UserProfile {
+  +id: int
+  +phone: string
+  +address: string
+  +city: string
+  +pincode: string
+  +email_verified: bool
+}
+
+class PaymentTransaction {
+  +id: int
+  +provider: string
+  +amount: decimal
+  +status: string
+  +reference: string
+  +provider_payment_id: string
+  +paid_at: datetime
+  +created_at: datetime
+  +updated_at: datetime
+}
+
+Category "1" <-- "0..*" Product : category
+User "1" <-- "0..1" Cart : cart
+Cart "1" <-- "0..*" CartItem : items
+Product "1" <-- "0..*" CartItem : product
+
+User "1" <-- "0..*" Order : orders
+Order "1" <-- "1..*" OrderItem : items
+Product "1" <-- "0..*" OrderItem : product
+
+User "1" <-- "0..*" Subscription : subscriptions
+Subscription "1" <-- "1..*" SubscriptionItem : items
+Product "1" <-- "0..*" SubscriptionItem : product
+
+Order "1" <-- "0..*" PaymentTransaction : payments
+User "1" <-- "0..1" UserProfile : profile
+Order "0..1" <-- "0..*" Subscription : last_order
+
+@enduml

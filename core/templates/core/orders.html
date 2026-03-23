@@ -43,6 +43,9 @@
               <a href="{{ card.delivery_map_link }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">Delivery Address Map</a>
               <a href="{{ card.map_link }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary">Current Location Map</a>
               <a href="{% url 'track_order' card.order.id %}" class="btn btn-sm btn-primary">Track</a>
+              {% if card.pending_online_payment %}
+                <a href="{% url 'payment' card.order.id %}" class="btn btn-sm btn-warning">Complete Payment</a>
+              {% endif %}
             </div>
             {% if card.order.tracking_status != "cancelled" and card.order.tracking_status != "delivered" %}
               <form method="post" action="{% url 'cancel_order' card.order.id %}" class="mt-2 d-flex gap-2">

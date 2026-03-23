@@ -1,0 +1,56 @@
+@startuml
+left to right direction
+actor "Guest" as Guest
+actor "Authenticated User" as User
+actor "Payment Provider" as Provider
+
+rectangle "WaterSupply Web App" {
+  usecase "Browse products" as UC_Browse
+  usecase "Search/filter products" as UC_Search
+  usecase "View product detail" as UC_Detail
+  usecase "Add to cart" as UC_Add
+  usecase "Update cart" as UC_Update
+  usecase "Checkout" as UC_Checkout
+  usecase "Apply coupon" as UC_Coupon
+  usecase "Place order (COD)" as UC_COD
+  usecase "Online payment" as UC_Online
+  usecase "Track order" as UC_Track
+  usecase "Cancel order" as UC_Cancel
+  usecase "Request return" as UC_Return
+  usecase "Manage subscriptions" as UC_Sub
+  usecase "Sign up" as UC_Signup
+  usecase "Login" as UC_Login
+  usecase "Verify email" as UC_Verify
+  usecase "Reset password" as UC_Reset
+  usecase "Update profile" as UC_Profile
+}
+
+Guest --> UC_Browse
+Guest --> UC_Search
+Guest --> UC_Detail
+Guest --> UC_Add
+Guest --> UC_Update
+Guest --> UC_Signup
+Guest --> UC_Login
+Guest --> UC_Reset
+
+User --> UC_Browse
+User --> UC_Search
+User --> UC_Detail
+User --> UC_Add
+User --> UC_Update
+User --> UC_Checkout
+User --> UC_Track
+User --> UC_Cancel
+User --> UC_Return
+User --> UC_Sub
+User --> UC_Profile
+User --> UC_Verify
+
+UC_Checkout .> UC_Coupon : <<include>>
+UC_Checkout .> UC_COD : <<extend>>
+UC_Checkout .> UC_Online : <<extend>>
+
+Provider <-- UC_Online
+
+@enduml
